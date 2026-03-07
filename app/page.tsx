@@ -7,6 +7,7 @@ import CardsParallax from "../components/cards-parallax";
 import { MoveUpRight } from "lucide-react";
 import SearchBar from "../components/search-bar";
 import ShowcaseCarousel from "../components/showcase-carousel";
+import { Footer } from "../components/footer";
 
 function WordByWordFade({ text, className }: { text: string; className: string }) {
   const words = text.trim().split(/\s+/);
@@ -33,6 +34,17 @@ export default function OceanOfPDFHero() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showCustomCursor, setShowCustomCursor] = useState(false);
   const [isOverHero1, setIsOverHero1] = useState(false);
+
+  // keep the browser's default cursor visible when the user is hovering the
+  // first hero.  We used to hide the OS cursor globally, so the hero would
+  // render "no cursor" at all once the custom cursor opacity dropped to zero.
+  useEffect(() => {
+    if (isOverHero1) {
+      document.body.classList.remove("hide-default-cursor");
+    } else {
+      document.body.classList.add("hide-default-cursor");
+    }
+  }, [isOverHero1]);
   const [searchValue, setSearchValue] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -89,7 +101,8 @@ export default function OceanOfPDFHero() {
   // Search bar motion keeps the same logo-to-navbar timing.
   const searchY = useTransform(smoothProgress, [0, 0.075], ["20vh", "2.15rem"]);
   const searchScale = useTransform(smoothProgress, [0, 0.075], [1.75, 1]);
-  const searchPointerEvents = useTransform(smoothProgress, [0, 0.075], ["none", "auto"]);
+  // allow typing immediately rather than waiting for scroll animation
+  const searchPointerEvents = "auto";
 
   // --- SECTION 1 (Blue) ---
   // Shrinks 4x and pulls up. 
@@ -122,7 +135,8 @@ export default function OceanOfPDFHero() {
   const hero6Scale = useTransform(smoothProgress, [0.85, 1.0], [1.2, 1]);
 
   return (
-    <main className="bg-[#0C0A00]">
+    <main className="relative">
+      <div className="fixed inset-0 bg-[#0C0A00] -z-10" />
 
       {/* Global Custom Cursor */}
       <motion.div
@@ -163,62 +177,9 @@ export default function OceanOfPDFHero() {
         </AnimatePresence>
       </motion.div>
 
-      {/* 1. FIXED SEARCH BAR - Layered on top of everything (z-120) */}
-      <motion.div
-        style={{
-          y: searchY,
-          scale: searchScale,
-          x: "-50%",
-          pointerEvents: searchPointerEvents,
-        }}
-        animate={{
-          zIndex: isMenuOpen ? 100 : 120, // Go behind menu when it's open
-        }}
-        transition={{ duration: 0.1 }}
-        className="fixed left-1/2 top-0 origin-top w-[min(86vw,30rem)]"
-      >
-        <SearchBar value={searchValue} onChange={setSearchValue} />
-      </motion.div>
 
-      {/* 2. FIXED NAVBAR (Socials/Menu - z-110) */}
-      <nav className="fixed top-0 left-0 w-full z-[110] flex justify-between items-center p-8 lg:p-10 pointer-events-none">
-        <div className="flex items-center gap-6 text-[#737373] text-[13px] tracking-[0.12em] pointer-events-auto">
-          {[
-            { label: "OceanOfPDF", className: "font-[family-name:var(--font-carattere)] text-2xl tracking-normal normal-case" },
-            { label: "Discover", className: "font-[family-name:var(--font-instrument-serif)] italic normal-case" },
-            { label: "Donate", className: "font-[family-name:var(--font-instrument-serif)] italic normal-case" },
-          ].map((link) => (
-            <span key={link.label} className={`cursor-pointer hover:opacity-60 transition-opacity ${link.className}`}>{link.label}</span>
-          ))}
-        </div>
 
-        {/* Landing slot for centered animated search bar */}
-        <div className="w-[min(30rem,42vw)] hidden lg:block" />
 
-        {/* Hamburger Menu Button */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="flex flex-col cursor-pointer group pointer-events-auto relative z-[111] w-12 h-8 justify-center items-center"
-          aria-label="Toggle menu"
-        >
-          <motion.div
-            animate={{
-              rotate: isMenuOpen ? 45 : 0,
-              y: isMenuOpen ? 0 : -5,
-            }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-            className="w-12 h-[3px] bg-[#737373] transition-all origin-center absolute"
-          />
-          <motion.div
-            animate={{
-              rotate: isMenuOpen ? -45 : 0,
-              y: isMenuOpen ? 0 : 5,
-            }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-            className="w-12 h-[3px] bg-[#737373] transition-all origin-center absolute"
-          />
-        </button>
-      </nav>
 
       {/* Fullscreen Menu Overlay */}
       <AnimatePresence mode="wait">
@@ -299,7 +260,8 @@ export default function OceanOfPDFHero() {
       <div ref={containerRef} className="relative h-[1200vh]">
         {/* SECTION 1: HERO */}
         <div
-          className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden z-10"
+          className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden z-10 cursor-auto"
+          style={{ cursor: "auto !important" }}
           onMouseEnter={() => setIsOverHero1(true)}
           onMouseLeave={() => setIsOverHero1(false)}
         >
@@ -308,9 +270,9 @@ export default function OceanOfPDFHero() {
               y: hero1Y,
               scale: hero1Scale,
               borderRadius: hero1Radius,
-              backgroundImage: "url('/books/marble.png')",
+              backgroundImage: "url('/download.png')",
             }}
-            className="relative h-screen w-full bg-[#4ce1f5] bg-cover bg-center flex flex-col p-10 lg:p-16 origin-center overflow-hidden shadow-2xl"
+            className="relative h-screen w-full bg-[#ffffff] bg-cover bg-center flex flex-col p-10 lg:p-16 origin-center overflow-hidden shadow-2xl"
           >
             <div
               className="absolute inset-0 z-0 pointer-events-none"
@@ -349,7 +311,7 @@ export default function OceanOfPDFHero() {
             bg-gradient-to-br from-[#737373] via-[#d9d9d9] to-[#a8a8a8]
             font-serif italic text-4xl lg:text-5xl leading-[0.85]
           ">
-                    The Creative <br /> Agency—
+                    A Reader's <br /> last stop—
                   </p>
                 </div>
               </div>
@@ -364,15 +326,6 @@ export default function OceanOfPDFHero() {
               /> */}
             </div>
 
-            {/* Center portrait overlay (rotated left 90deg) */}
-            <div className="absolute inset-0 z-20 flex items-center justify-start pointer-events-none">
-              <img
-                src="/image.png"
-                alt="Center Portrait"
-                className="h-[55%] w-auto object-contain -ml-[10vw]"
-                style={{ transform: "rotate(-90deg)" }}
-              />
-            </div>
           </motion.section>
         </div>
 
@@ -483,7 +436,7 @@ export default function OceanOfPDFHero() {
 
           <div className="mt-10 border-t border-zinc-900/10" />
 
-          <h2 className="mt-12 text-zinc-900 text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.02] max-w-5xl">
+          <h2 className="mt-12 text-5xl md:text-6xl lg:text-7xl font-black tracking-[0.35em] uppercase text-zinc-900 leading-[1.02] max-w-5xl">
             Every number reflects a reader, a moment, a spark of change.
           </h2>
           <p className="mt-6 text-zinc-900/60 text-lg md:text-xl">
@@ -506,7 +459,7 @@ export default function OceanOfPDFHero() {
               className="h-full w-full px-8 py-16 md:px-16 lg:px-20"
             >
               <div className="max-w-6xl w-full">
-                <h3 className="text-[20vw] md:text-[14vw] leading-[0.9] font-black tracking-tight text-black">
+                <h3 className="text-[20vw] md:text-[14vw] leading-[0.9] font-black tracking-[0.35em] uppercase text-zinc-900">
                   What we do
                 </h3>
                 <p className="mt-6 text-[8vw] md:text-[5vw] lg:text-[3.8vw] text-zinc-500 leading-tight max-w-5xl">
@@ -572,73 +525,81 @@ export default function OceanOfPDFHero() {
       </section>
 
       {/* FOOTER PARALLAX SECTION */}
-      <section ref={footerRef} className="relative h-[200vh] w-full -mt-[100vh] z-30 bg-white">
-        <div className="sticky top-0 h-screen w-full overflow-hidden pointer-events-auto bg-white">
+      <section ref={footerRef} className="relative h-[200vh] w-full -mt-[100vh] z-30 bg-[#050505]">
+        <div className="sticky top-0 h-screen w-full overflow-hidden pointer-events-auto bg-[#050505]">
           <motion.div
             style={{ y: footerSlideY }}
-            className="absolute inset-0 bg-white text-black"
+            className="absolute inset-0 bg-[#050505] text-white"
           >
-            <div className="h-full w-full px-8 lg:px-16 pt-24">
-              <div className="flex items-start justify-between gap-8">
-                <motion.h2
-                  style={{ y: footerTitleY }}
-                  className="text-[18vw] md:text-[12vw] font-black tracking-tight text-black leading-[0.9]"
-                >
-                  OceanOfPDF
-                </motion.h2>
-                <motion.div style={{ y: footerInfoY }} className="max-w-sm text-right">
-                  <p className="text-lg text-zinc-500">
-                    We are currently based nowwhere and work secretly.
-                  </p>
-                  {/* <div className="mt-6"> */}
-                  {/* <div className="text-4xl font-semibold">11:34:41</div> */}
-                  {/* <div className="mt-1 text-sm text-zinc-500">Timezone (GMT+1)</div> */}
-                  {/* </div> */}
-                </motion.div>
-              </div>
-
-              <div className="mt-16 border-t border-black/10 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-3 space-y-3 text-lg">
-                  {["Home", "Work", "About", "Membership", "Journal"].map((item) => (
-                    <div key={item} className="flex items-center gap-3">
-                      <span className="w-2 h-0.5 bg-[#737373]" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="lg:col-span-3 space-y-3 text-lg">
-                  {["Privacy Policy", "Terms of Service", "Disclaimer", "404", "More Templates"].map((item) => (
-                    <div key={item} className="flex items-center gap-3">
-                      <span className="w-2 h-0.5 bg-[#737373]" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="lg:col-span-3 border-l border-black/10 pl-6">
-                  <h4 className="text-3xl font-semibold">Stay in the Loop</h4>
-                  <p className="mt-3 text-sm text-zinc-500">
-                    Stay informed about our latest news, updates by subscribing to our newsletter.
-                  </p>
-                  <p className="mt-3 text-xs text-zinc-500">
-                    We respect your inbox. No spam, just valuable updates.
-                  </p>
-                </div>
-                <div className="lg:col-span-3 border-l border-black/10 pl-6 space-y-5 text-lg">
-                  {["Whatsapp", "X", "Linkedin", "Instagram"].map((item) => (
-                    <div key={item} className="flex items-center justify-between">
-                      <span>{item}</span>
-                      <span className="text-[#737373]">›</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <Footer />
           </motion.div>
         </div>
       </section>
 
 
 
-    </main >
+
+      {/* 1. FIXED SEARCH BAR - Layered on top of everything (z-120) */}
+      <motion.div
+        style={{
+          y: searchY,
+          scale: searchScale,
+          x: "-50%",
+          pointerEvents: searchPointerEvents,
+          zIndex: isMenuOpen ? 100 : 120,
+        }}
+        transition={{ duration: 0.1 }}
+        className="fixed left-1/2 top-0 origin-top w-[min(86vw,30rem)]"
+      >
+        <SearchBar value={searchValue} onChange={setSearchValue} />
+      </motion.div>
+
+      {/* 2. FIXED NAVBAR (Socials/Menu - z-110) */}
+      <nav className="fixed top-0 left-0 w-full z-[110] flex justify-between items-center p-8 lg:p-10 pointer-events-none mix-blend-difference">
+        <div className="flex items-center gap-6 text-white text-[16px] tracking-[0.12em] pointer-events-auto">
+          {[
+            { label: "OceanOfPDF", className: "font-[family-name:var(--font-carattere)] text-3xl tracking-normal normal-case" },
+            { label: "Discover", className: "font-[family-name:var(--font-instrument-serif)] italic normal-case" },
+            { label: "Donate", className: "font-[family-name:var(--font-instrument-serif)] italic normal-case" },
+          ].map((link) => (
+            <span
+              key={link.label}
+              className={`cursor-pointer hover:opacity-60 transition-opacity ${link.className}`}
+            >
+              {link.label}
+            </span>
+          ))}
+        </div>
+
+        {/* Landing slot for centered animated search bar */}
+        <div className="w-[min(30rem,42vw)] hidden lg:block" />
+
+        {/* Hamburger Menu Button */}
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="flex flex-col cursor-pointer group pointer-events-auto relative w-12 h-8 justify-center items-center"
+          aria-label="Toggle menu"
+          style={{ zIndex: 111 }}
+        >
+          <motion.div
+            animate={{
+              rotate: isMenuOpen ? 45 : 0,
+              y: isMenuOpen ? 0 : -5,
+            }}
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+            className="w-12 h-[3px] bg-white transition-all origin-center absolute"
+          />
+          <motion.div
+            animate={{
+              rotate: isMenuOpen ? -45 : 0,
+              y: isMenuOpen ? 0 : 5,
+            }}
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+            className="w-12 h-[3px] bg-white transition-all origin-center absolute"
+          />
+        </button>
+      </nav>
+
+    </main>
   );
 }

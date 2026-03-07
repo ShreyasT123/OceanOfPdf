@@ -1,124 +1,72 @@
 import Link from "next/link"
-import { ArrowUpRight, Github, Linkedin, Mail } from "lucide-react"
+import Image from "next/image"
 
 export function Footer() {
     return (
-        <footer className="relative min-h-[280px] w-full bg-black text-[#fefefe] overflow-hidden border-t border-white/10">
-            {/* Background Image with Overlay */}
-            <div
-                className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40 mix-blend-luminosity"
-                style={{ backgroundImage: `url('/dark-forest.png')` }}
-            />
-            <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+        <footer className="relative w-full min-h-screen bg-[#050505] text-white overflow-hidden flex flex-col justify-between">
+            {/* Background Image & Overlay */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <Image
+                    src="/download (3).jpg"
+                    alt="Footer Background"
+                    fill
+                    className="object-cover transition-opacity duration-1000"
+                    priority
+                />
+            </div>
 
-            {/* Grid Content */}
-            <div className="relative z-10 h-full flex flex-col">
+            {/* Content Container */}
+            <div className="relative z-10 w-full flex flex-col justify-between h-full px-8 md:px-16 pt-16 pb-0 flex-1">
+
                 {/* Top Section */}
-                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 border-b border-white/10">
+                <div className="flex flex-col flex-1 pb-16">
+                    {/* Spacer to push middle content down */}
+                    <div className="flex-1" />
 
-                    {/* Brand / Navigation Column */}
-                    <div className="p-6 md:p-8 border-r border-white/10 space-y-6">
-                        <h3 className="text-2xl font-serif">Navigation</h3>
-                        <ul className="space-y-3">
-                            {[
-                                { label: "Home", href: "/" },
-                                { label: "Projects", href: "/projects" },
-                                { label: "Writing", href: "/writing" }, // Keeping existing routes
-                                { label: "Resume", href: "/resume" },   // Keeping existing routes
-                            ].map((item) => (
-                                <li key={item.label}>
-                                    <Link
-                                        href={item.href}
-                                        className="text-[10px] font-mono tracking-widest uppercase text-[#fefefe]/50 hover:text-[#fefefe] transition-colors"
-                                    >
-                                        {item.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Projects Column */}
-                    <div className="p-6 md:p-8 border-r border-white/10 space-y-6">
-                        <h3 className="text-2xl font-serif">Selected Works</h3>
-                        <ul className="space-y-3">
-                            {[
-                                { label: "Superpos", href: "/projects#superpos" },
-                                { label: "MARS", href: "/projects#mars" },
-                                { label: "ML Systems Exp.", href: "/projects#research" },
-                            ].map((item) => (
-                                <li key={item.label}>
-                                    <Link
-                                        href={item.href}
-                                        className="text-[10px] font-mono tracking-widest uppercase text-[#fefefe]/50 hover:text-[#fefefe] transition-colors"
-                                    >
-                                        {item.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Connect Column */}
-                    <div className="p-6 md:p-8 border-r border-white/10 space-y-6">
-                        <h3 className="text-2xl font-serif">Connect</h3>
-                        <ul className="space-y-3">
-                            {[
-                                { label: "Email", href: "mailto:shreyasthale54@gmail.com", icon: <Mail className="w-3 h-3" /> },
-                                { label: "GitHub", href: "https://github.com/ShreyasT123", icon: <Github className="w-3 h-3" /> },
-                                { label: "LinkedIn", href: "https://www.linkedin.com/in/shreyas-thale/", icon: <Linkedin className="w-3 h-3" /> },
-                            ].map((item) => (
-                                <li key={item.label}>
-                                    <Link
-                                        href={item.href}
-                                        className="group flex items-center gap-2 text-[10px] font-mono tracking-widest uppercase text-[#fefefe]/50 hover:text-[#fefefe] transition-colors"
-                                    >
-                                        {item.icon}
-                                        {item.label}
-                                        <ArrowUpRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Empty/Brand Column (Optional, or use for 'About' snippet) */}
-                    <div className="p-6 md:p-8 space-y-6 flex flex-col justify-between">
-                        <div className="space-y-4">
-                            <div className="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center">
-                                <span className="font-serif italic">ST</span>
-                            </div>
-                            <p className="text-[10px] font-mono tracking-widest uppercase text-[#fefefe]/40 leading-relaxed">
-                                Designing autonomous machine learning systems.
-                            </p>
+                    {/* Middle Content */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end w-full gap-10 mt-auto">
+                        {/* Left Text */}
+                        <div className="text-[12px] md:text-[14px] font-sans tracking-[0.2em] font-medium leading-[2] uppercase text-white/90">
+                            Every moment holds<br />
+                            a story waiting to be<br />
+                            captured
                         </div>
+
+                        {/* Right Nav */}
+                        <ul className="flex flex-wrap gap-8 md:gap-12 text-[12px] md:text-[14px] font-sans tracking-[0.2em] font-bold uppercase z-20">
+                            <li><Link href="/" className="hover:text-white/60 transition-colors">Home</Link></li>
+                            <li><Link href="/about" className="hover:text-white/60 transition-colors">About</Link></li>
+                            <li><Link href="/projects" className="hover:text-white/60 transition-colors">Gallery</Link></li>
+                            <li><Link href="/writing" className="hover:text-white/60 transition-colors">Articles</Link></li>
+                            <li><Link href="mailto:shreyasthale54@gmail.com" className="hover:text-white/60 transition-colors">Contact</Link></li>
+                        </ul>
                     </div>
                 </div>
 
-                {/* Bottom Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2">
-                    <div className="p-10 lg:p-16 flex flex-col justify-between border-r border-white/10 min-h-[200px]">
-                        <div className="text-[10px] font-mono tracking-[0.3em] uppercase text-[#fefefe]/20">
-                            Mumbai, India
-                        </div>
-                        <div className="space-y-4">
-                            <h2 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase italic opacity-90 leading-none">
-                                SHREYAS
-                            </h2>
-                        </div>
+                {/* Divider Line */}
+                <div className="w-full h-[1px] bg-white/20 mb-10" />
+
+                {/* Bottom Content beneath line */}
+                <div className="flex flex-col md:flex-row justify-between items-center w-full mb-8 gap-6 z-20">
+                    <div className="text-[10px] md:text-[12px] font-sans tracking-[0.15em] font-semibold uppercase text-white/70">
+                        © {new Date().getFullYear()}. SHREYAS RIGHTS RESERVED.
                     </div>
 
-                    <div className="p-6 md:p-10 space-y-8 flex flex-col justify-end">
-                        <div className="pt-8 text-[10px] font-mono tracking-widest uppercase text-[#fefefe]/20 flex justify-between items-end">
-                            <div>
-                                © {new Date().getFullYear()} Shreyas Thale. <br />
-                                All rights reserved.
-                            </div>
-                            <div className="text-[#fefefe]/10">
-                                B.Tech CSE @ FCRIT
-                            </div>
-                        </div>
-                    </div>
+                    <ul className="flex gap-8 md:gap-12 text-[10px] md:text-[12px] font-sans tracking-[0.2em] font-bold uppercase">
+                        <li><Link href="https://linkedin.com/in/shreyas-thale/" target="_blank" className="hover:text-white/60 transition-colors">LinkedIn</Link></li>
+                        <li><Link href="https://github.com/ShreyasT123" target="_blank" className="hover:text-white/60 transition-colors">GitHub</Link></li>
+                        <li><Link href="mailto:shreyasthale54@gmail.com" className="hover:text-white/60 transition-colors">Email</Link></li>
+                    </ul>
+                </div>
+
+                {/* Huge Text at Bottom spanning the width */}
+                <div className="w-full relative flex justify-center items-end h-[24vw] md:h-[22vw] overflow-hidden -mb-2 md:-mb-4 pointer-events-none select-none">
+                    {/* Solid Text */}
+                    <h1
+                        className="text-[26vw] sm:text-[24vw] md:text-[23vw] leading-[0.75] font-black uppercase text-white tracking-tighter w-full text-center absolute bottom-0 z-10"
+                    >
+                        OceanofPDF
+                    </h1>
                 </div>
             </div>
         </footer>

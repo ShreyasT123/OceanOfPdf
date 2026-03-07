@@ -61,7 +61,7 @@ export default function CardsParallax({ scrollProgress, inputRange, onHoverChang
                         style={{ y, x }}
                         onMouseEnter={() => onHoverChange?.(true)}
                         onMouseLeave={() => onHoverChange?.(false)}
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[25vw] h-[35vw] bg-zinc-800 rounded-xl border border-white/10 overflow-hidden shadow-2xl origin-center pointer-events-auto"
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[25vw] h-[35vw] bg-zinc-800 border border-white/10 overflow-hidden shadow-2xl origin-center pointer-events-auto"
                     >
                         <div className="relative w-full h-full">
                             {/* Fallback gradient */}

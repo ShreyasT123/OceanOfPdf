@@ -133,19 +133,15 @@
   --color-surface-elevated-foreground: var(--surface-elevated-foreground);
 }
 
-html,
-body {
+/* default OS cursor hidden only when .hide-default-cursor is present on root */
+.hide-default-cursor,
+.hide-default-cursor * {
   cursor: none !important;
 }
 
-a,
-button,
-[role="button"],
-span,
-div {
-  /* Ensure children don't reset cursor */
-  cursor: none !important;
-}
+/* NOTE: other rules that previously forced cursor:none globally have been
+   scoped above. Components can toggle the class on <body> or <html> when the
+   custom cursor should replace the system one. */
 
 @layer base {
   * {
