@@ -64,7 +64,7 @@ const DevHero: React.FC<DevHeroProps> = ({
             />
           </svg>
           <span className="text-xl font-semibold tracking-widest uppercase">
-            LUMEN
+            OceanOfPDF
           </span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-[11px] font-semibold tracking-[0.15em] uppercase text-zinc-300">
