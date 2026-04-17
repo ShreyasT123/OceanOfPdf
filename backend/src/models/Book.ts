@@ -29,7 +29,6 @@ const BookSchema: Schema = new Schema(
   }
 );
 
-// Add text index for better search if needed, but for now we'll use regex/atlas search
 BookSchema.index({ title: 'text', author: 'text', category: 'text' });
 
 const Book: Model<IBook> = mongoose.models.Book || mongoose.model<IBook>('Book', BookSchema);

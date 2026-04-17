@@ -71,7 +71,7 @@ function SearchContent() {
     setHasSearched(true);
 
     try {
-      const response = await fetch(`/api/books/search?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`http://localhost:5000/api/books/search?q=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
 
       if (data.error) throw new Error(data.error);
