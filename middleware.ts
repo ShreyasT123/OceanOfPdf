@@ -9,9 +9,10 @@ export async function middleware(request: NextRequest) {
 
   const isLoginPage = request.nextUrl.pathname === '/login'
   const isSearchPage = request.nextUrl.pathname.startsWith('/search')
+  const isUploadPage = request.nextUrl.pathname.startsWith('/upload')
 
   // Define protected routes
-  const isProtectedRoute = isSearchPage
+  const isProtectedRoute = isSearchPage || isUploadPage
 
   if (isProtectedRoute) {
     if (!token) {
