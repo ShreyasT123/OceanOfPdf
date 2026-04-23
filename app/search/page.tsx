@@ -45,6 +45,8 @@ function SearchContent() {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [results, setResults] = useState<Book[]>([]);
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
 
   // --- Custom Cursor Logic ---
   const springConfig = { stiffness: 1000, damping: 50, mass: 0.1 };
@@ -71,7 +73,7 @@ function SearchContent() {
     setHasSearched(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/books/search?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`${BACKEND_URL}/api/books/search?q=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
 
       if (data.error) throw new Error(data.error);

@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_BOOKS_BUCKET = process.env.SUPABASE_BOOKS_BUCKET || "oop";
-const SUPABASE_COVERS_BUCKET = process.env.SUPABASE_COVERS_BUCKET || SUPABASE_BOOKS_BUCKET;
+const SUPABASE_COVERS_BUCKET = SUPABASE_BOOKS_BUCKET;
 const SUPABASE_BOOKS_PREFIX = process.env.SUPABASE_BOOKS_PREFIX || "books";
 const SUPABASE_COVERS_PREFIX = process.env.SUPABASE_COVERS_PREFIX || "cover_imgs";
 
