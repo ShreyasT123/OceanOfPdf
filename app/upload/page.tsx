@@ -295,6 +295,7 @@ export default function UploadPage() {
                   { href: "/devs", label: "Our Team" },
                   { href: "/contact", label: "Contact" },
                   { href: "/upload", label: "Upload" },
+                  { href: "/donate", label: "Donate" },
                 ].map((item, index) => (
                   <motion.div
                     key={item.href}

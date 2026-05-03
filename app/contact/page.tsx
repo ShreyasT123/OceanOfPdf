@@ -189,6 +189,8 @@ export default function ContactPage() {
                   { href: "/work", label: "Work" },
                   { href: "/devs", label: "Our Team" },
                   { href: "/contact", label: "Contact" },
+                  { href: "/upload", label: "Upload" },
+                  { href: "/donate", label: "Donate" },
                 ].map((item, index) => (
                   <motion.div
                     key={item.href}

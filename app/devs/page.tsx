@@ -84,40 +84,28 @@ export default function DevsPage() {
 
   const team = [
     {
-      name: "Sarah Chen",
-      role: "Founder & CEO",
-      bio: "Passionate about making knowledge accessible to everyone.",
-      skills: ["Strategy", "Product", "Design"]
+      name: "Shreyas Thale",
+      role: "Full-Stack Developer",
+      bio: "Building the core infrastructure and APIs that power OceanOfPdf.",
+      skills: ["Backend", "Database", "APIs"]
     },
     {
-      name: "Marcus Rodriguez",
-      role: "CTO",
-      bio: "Building scalable infrastructure for massive search indexing.",
-      skills: ["Backend", "Infrastructure", "DevOps"]
+      name: "Aarushi Sontakke",
+      role: "Frontend Engineer",
+      bio: "Crafting intuitive interfaces and smooth user experiences.",
+      skills: ["React", "UI/UX", "Frontend"]
     },
     {
-      name: "Elena Petrov",
-      role: "Lead Designer",
-      bio: "Crafting elegant experiences for book discovery.",
-      skills: ["UI/UX", "Frontend", "Branding"]
+      name: "Shone Thomas",
+      role: "Full-Stack Developer",
+      bio: "Developing scalable solutions for document processing and search.",
+      skills: ["Backend", "Frontend", "Infrastructure"]
     },
     {
-      name: "James Wilson",
-      role: "Head of Content",
-      bio: "Curating and organizing the world's largest book database.",
-      skills: ["Curation", "Analysis", "Metadata"]
-    },
-    {
-      name: "Yuki Tanaka",
-      role: "ML Engineer",
-      bio: "Developing smart recommendation systems.",
-      skills: ["Machine Learning", "NLP", "Data Science"]
-    },
-    {
-      name: "David Okonkwo",
-      role: "Community Manager",
-      bio: "Building relationships with readers and contributors worldwide.",
-      skills: ["Community", "Engagement", "Support"]
+      name: "John Price",
+      role: "Lead Developer",
+      bio: "Architecting the entire platform and ensuring code quality.",
+      skills: ["Architecture", "DevOps", "Leadership"]
     }
   ];
 
@@ -170,6 +158,8 @@ export default function DevsPage() {
                   { href: "/work", label: "Work" },
                   { href: "/devs", label: "Our Team" },
                   { href: "/contact", label: "Contact" },
+                  { href: "/upload", label: "Upload" },
+                  { href: "/donate", label: "Donate" },
                 ].map((item, index) => (
                   <motion.div
                     key={item.href}
