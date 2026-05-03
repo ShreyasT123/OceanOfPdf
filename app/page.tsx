@@ -9,60 +9,10 @@ import { MoveUpRight } from "lucide-react";
 import SearchBar from "../components/search-bar";
 import ScrollCarouselParallax from "@/components/stick_carousel"; // Added Import from File 2
 
-// ─── NEW COMPONENTS FROM FILE 2 ──────────────────────────────────────────────
+import { Noise } from "@/components/noise";
 
-function Noise() {
-  return (
-    <div
-      className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.018] z-0"
-      style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-      }}
-    />
-  );
-}
-
-function CharByCharReveal({ text, className }: { text: string; className: string }) {
-  return (
-    <span className={className}>
-      {text.split("").map((char, index) => (
-        <motion.span
-          key={`${char}-${index}`}
-          initial={{ opacity: 0, filter: "saturate(0%) brightness(0.5)" }}
-          whileInView={{ opacity: 1, filter: "saturate(100%) brightness(1)" }}
-          viewport={{ once: false, amount: 0.95 }}
-          transition={{ duration: 0.1, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-block will-change-transform"
-        >
-          {char === "\n" ? <br /> : char}
-        </motion.span>
-      ))}
-    </span>
-  );
-}
-
-// ─── EXISTING COMPONENTS ─────────────────────────────────────────────────────
-
-function WordByWordFade({ text, className }: { text: string; className: string }) {
-  const words = text.trim().split(/\s+/);
-
-  return (
-    <h2 className={className}>
-      {words.map((word, index) => (
-        <motion.span
-          key={`${word}-${index}`}
-          initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: false, amount: 0.8 }}
-          transition={{ duration: 0.75, delay: index * 0.16, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-block mr-[0.28em] will-change-transform"
-        >
-          {word}
-        </motion.span>
-      ))}
-    </h2>
-  );
-}
+import { CharByCharReveal, WordByWordFade } from "@/components/text-animations";
+import { MenuOverlay } from "@/components/menu-overlay";
 
 export default function OceanOfPDFHero() {
   const router = useRouter();
@@ -253,51 +203,7 @@ export default function OceanOfPDFHero() {
       </AnimatePresence>
 
       {/* Fullscreen Menu Overlay */}
-      <AnimatePresence mode="wait">
-        {isMenuOpen && (
-          <motion.div
-            initial={{ y: "-100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "-100%" }}
-            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1], delay: isMenuOpen ? 0 : 0.3 }}
-            className="fixed inset-0 z-[105] overflow-hidden"
-            style={{ backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', backgroundColor: 'rgba(254,254,254,0.4)' }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-cyan-500/5" />
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, delay: isMenuOpen ? 0.3 : 0 }}
-              className="relative h-full w-full flex items-center justify-end px-8 lg:px-16 overflow-hidden"
-            >
-              <nav className="flex flex-col items-end gap-4 lg:gap-6 max-w-full">
-                {[
-                  { href: "/", label: "Home" },
-                  { href: "/about", label: "About" },
-                  { href: "/work", label: "Work" },
-                  { href: "/devs", label: "Our Team" },
-                  { href: "/contact", label: "Contact" },
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.href}
-                    initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}
-                    transition={{ duration: 0.4, delay: isMenuOpen ? 0.4 + index * 0.05 : 0, ease: [0.23, 1, 0.32, 1] }}
-                  >
-                    <Link
-                      href={item.href}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-zinc-900/90 hover:text-zinc-900 transition-all duration-300 tracking-tight leading-none block whitespace-nowrap"
-                      style={{ textShadow: '0 0 40px rgba(255,95,31,0.2)' }}
-                    >
-                      {item.label}
-                    </Link>
-                  </motion.div>
-                ))}
-              </nav>
-            </motion.div>
-            <div className="absolute inset-0 -z-10" onClick={() => setIsMenuOpen(false)} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MenuOverlay isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       {/* 3. SCROLLABLE CONTAINER (First sequence) */}
       <div ref={containerRef} className="relative h-[1200vh]">

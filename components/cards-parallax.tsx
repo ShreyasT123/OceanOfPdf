@@ -55,27 +55,46 @@ export default function CardsParallax({ scrollProgress, inputRange, onHoverChang
                     ["0vw", xTarget, xTarget] // [Center, Side, Side]
                 );
 
+                // Rotation Motion
+                const rotate = useTransform(
+                    scrollProgress,
+                    [cardStart, transitionPoint, cardEnd],
+                    [i % 2 === 0 ? -5 : 5, i % 2 === 0 ? -12 : 12, i % 2 === 0 ? -8 : 8]
+                );
+
+                const scale = useTransform(
+                    scrollProgress,
+                    [cardStart, transitionPoint, cardEnd],
+                    [0.8, 1, 0.9]
+                );
+
                 return (
                     <motion.div
                         key={i}
-                        style={{ y, x }}
+                        style={{ y, x, rotate, scale }}
                         onMouseEnter={() => onHoverChange?.(true)}
                         onMouseLeave={() => onHoverChange?.(false)}
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[25vw] h-[35vw] bg-zinc-800 border border-white/10 overflow-hidden shadow-2xl origin-center pointer-events-auto"
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[22vw] h-[32vw] bg-[#1a1a1a] rounded-2xl border border-white/10 overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] origin-center pointer-events-auto group"
                     >
                         <div className="relative w-full h-full">
+                            {/* Inner Glow/Border */}
+                            <div className="absolute inset-0 border border-white/5 rounded-2xl z-20 pointer-events-none" />
+                            
                             {/* Fallback gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-zinc-700 to-zinc-900" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-black" />
 
                             {/* Actual Image */}
                             <img
                                 src={img}
                                 alt={`Card ${i + 1}`}
-                                className="absolute inset-0 w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity"
+                                className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
                             />
 
                             {/* Overlay for depth */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-white/10 mix-blend-overlay pointer-events-none" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-white/5 mix-blend-overlay pointer-events-none" />
+                            
+                            {/* Shine effect */}
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:200%_200%] animate-shine pointer-events-none" />
                         </div>
                     </motion.div>
                 );

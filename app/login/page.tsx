@@ -6,23 +6,18 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogIn, Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
 
-function Noise() {
-  return (
-    <div
-      className="fixed inset-0 w-full h-full pointer-events-none opacity-[0.025] z-0"
-      style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-      }}
-    />
-  );
-}
+import { Noise } from "@/components/noise";
+
+import { BACKEND_URL } from "@/lib/constants";
+import { SubpageHeader } from "@/components/subpage-header";
+import { MenuOverlay } from "@/components/menu-overlay";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const router = useRouter();
 
@@ -97,11 +92,10 @@ export default function LoginPage() {
 
   return (
     <main className="relative min-h-screen bg-[#fefefe] text-zinc-900 selection:bg-black selection:text-white overflow-hidden font-sans flex items-center justify-center p-8">
-      <Noise />
+      <Noise className="fixed inset-0" opacity={0.025} />
       
-      <Link href="/" className="fixed top-8 left-8 flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-zinc-500 hover:text-black transition-colors z-20">
-        <ArrowLeft className="w-4 h-4" /> Back to Home
-      </Link>
+      <MenuOverlay isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <SubpageHeader isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} theme="light" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
