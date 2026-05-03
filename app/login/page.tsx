@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -25,6 +25,10 @@ export default function LoginPage() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
   const router = useRouter();
+
+  useEffect(() => {
+    document.body.classList.remove("hide-default-cursor");
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
