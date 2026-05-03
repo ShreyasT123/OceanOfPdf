@@ -1,8 +1,9 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   BookOpen,
@@ -10,6 +11,8 @@ import {
   FileText,
   Loader2,
   Upload,
+  Menu,
+  X,
 } from "lucide-react";
 
 type FormState = {
@@ -29,6 +32,60 @@ const initialForm: FormState = {
   tags: "",
   summary: "",
 };
+
+// Noise Component
+function Noise() {
+  return (
+    <div
+      className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.018] z-0"
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+      }}
+    />
+  );
+}
+
+// Character by Character Reveal
+function CharByCharReveal({ text, className }: { text: string; className: string }) {
+  return (
+    <span className={className}>
+      {text.split("").map((char, index) => (
+        <motion.span
+          key={`${char}-${index}`}
+          initial={{ opacity: 0, filter: "saturate(0%) brightness(0.5)" }}
+          whileInView={{ opacity: 1, filter: "saturate(100%) brightness(1)" }}
+          viewport={{ once: false, amount: 0.95 }}
+          transition={{ duration: 0.1, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+          className="inline-block will-change-transform"
+        >
+          {char === "\n" ? <br /> : char}
+        </motion.span>
+      ))}
+    </span>
+  );
+}
+
+// Word by Word Fade
+function WordByWordFade({ text, className }: { text: string; className: string }) {
+  const words = text.trim().split(/\s+/);
+
+  return (
+    <div className={className}>
+      {words.map((word, index) => (
+        <motion.span
+          key={`${word}-${index}`}
+          initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          viewport={{ once: false, amount: 0.8 }}
+          transition={{ duration: 0.75, delay: index * 0.16, ease: [0.22, 1, 0.36, 1] }}
+          className="inline-block mr-[0.28em] will-change-transform"
+        >
+          {word}
+        </motion.span>
+      ))}
+    </div>
+  );
+}
 
 const categories = [
   "Fiction",
@@ -58,6 +115,31 @@ export default function UploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showCustomCursor, setShowCustomCursor] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Custom cursor tracking
+  const springConfig = { stiffness: 1000, damping: 50, mass: 0.1 };
+  const cursorX = useSpring(0, springConfig);
+  const cursorY = useSpring(0, springConfig);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      cursorX.set(e.clientX);
+      cursorY.set(e.clientY);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [cursorX, cursorY]);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.classList.remove("hide-default-cursor");
+    } else {
+      document.body.classList.add("hide-default-cursor");
+    }
+  }, [isMenuOpen]);
 
   const tagPreview = useMemo(
     () =>
@@ -149,88 +231,251 @@ export default function UploadPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f6f1e8] text-zinc-950">
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 md:px-10 lg:px-12">
-        <div className="flex items-center justify-between border-b border-zinc-300 pb-6">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-zinc-600 transition-colors hover:text-black"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Link>
+    <main ref={containerRef} className="relative min-h-screen bg-[#0C0A00]">
+      <Noise />
 
-          <div className="flex items-center gap-3 text-right">
-            <div className="h-2 w-2 rounded-full bg-emerald-500" />
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-zinc-500">
-                Upload Desk
+      {/* Global Custom Cursor */}
+      <motion.div
+        className="fixed pointer-events-none z-[150] mix-blend-difference"
+        style={{
+          x: cursorX,
+          y: cursorY,
+          translateX: "-50%",
+          translateY: "-50%",
+        }}
+        animate={{
+          scale: 1,
+          opacity: isMenuOpen ? 0 : 1,
+        }}
+      >
+        <AnimatePresence mode="wait">
+          {!showCustomCursor ? (
+            <motion.div
+              key="default-cursor"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              className="w-4 h-4 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+            />
+          ) : (
+            <motion.div
+              key="visit-cursor"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className="w-24 h-24 rounded-full bg-white flex flex-col items-center justify-center shadow-2xl"
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Menu Overlay */}
+      <AnimatePresence mode="wait">
+        {isMenuOpen && (
+          <motion.div
+            initial={{ y: "-100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "-100%" }}
+            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1], delay: isMenuOpen ? 0 : 0.3 }}
+            className="fixed inset-0 z-[105] overflow-hidden"
+            style={{ backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', backgroundColor: 'rgba(254,254,254,0.4)' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-cyan-500/5" />
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, delay: isMenuOpen ? 0.3 : 0 }}
+              className="relative h-full w-full flex items-center justify-end px-8 lg:px-16 overflow-hidden"
+            >
+              <nav className="flex flex-col items-end gap-4 lg:gap-6 max-w-full">
+                {[
+                  { href: "/", label: "Home" },
+                  { href: "/about", label: "About" },
+                  { href: "/work", label: "Work" },
+                  { href: "/devs", label: "Our Team" },
+                  { href: "/contact", label: "Contact" },
+                  { href: "/upload", label: "Upload" },
+                ].map((item, index) => (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}
+                    transition={{ duration: 0.4, delay: isMenuOpen ? 0.4 + index * 0.05 : 0, ease: [0.23, 1, 0.32, 1] }}
+                  >
+                    <Link
+                      href={item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-zinc-900/90 hover:text-zinc-900 transition-all duration-300 tracking-tight leading-none block whitespace-nowrap"
+                      style={{ textShadow: '0 0 40px rgba(255,95,31,0.2)' }}
+                    >
+                      {item.label}
+                    </Link>
+                  </motion.div>
+                ))}
+              </nav>
+            </motion.div>
+            <div className="absolute inset-0 -z-10" onClick={() => setIsMenuOpen(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Header */}
+      <motion.header 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 lg:px-16"
+      >
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-white/70 transition-colors hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Home
+        </Link>
+
+        <motion.button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="relative z-50 text-white"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          {isMenuOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
+        </motion.button>
+      </motion.header>
+
+      <div className="relative pt-32 pb-20">
+        {/* Hero Section */}
+        <motion.section 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          className="relative min-h-[60vh] flex items-center justify-center px-8 lg:px-16"
+        >
+          <div className="max-w-5xl w-full">
+            <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-white/50">
+                  Share Knowledge
+                </p>
+              </motion.div>
+
+              <div className="space-y-3">
+                <CharByCharReveal 
+                  text="Upload & Share." 
+                  className="text-5xl lg:text-7xl font-bold text-white leading-tight"
+                />
+                <WordByWordFade 
+                  text="Add your books to the archive and make them discoverable to readers worldwide." 
+                  className="text-base lg:text-lg text-white/60 max-w-3xl leading-relaxed"
+                />
               </div>
-              <div className="text-sm text-zinc-600">Supabase Storage + MongoDB catalog</div>
             </div>
           </div>
-        </div>
+        </motion.section>
 
-        <div className="grid flex-1 gap-12 py-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.7fr)] lg:gap-16">
-          <section className="flex flex-col justify-between gap-10">
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-zinc-500">
-                  Intake
-                </p>
-                <h1 className="max-w-3xl text-4xl font-black uppercase leading-none tracking-tight md:text-6xl">
-                  Upload a book and make it searchable.
-                </h1>
-                <p className="max-w-2xl text-base leading-7 text-zinc-600 md:text-lg">
-                  PDF goes to Supabase Storage. Metadata lands in MongoDB. The archive can
-                  then pick it up through the existing search flow.
-                </p>
-              </div>
+        <div className="mx-auto max-w-7xl px-8 lg:px-16">
+          <div className="grid flex-1 gap-12 py-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.7fr)] lg:gap-16">
+            <section className="flex flex-col justify-between gap-10">
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-white/50">
+                    Intake
+                  </p>
+                  <h2 className="max-w-3xl text-4xl font-black uppercase leading-none tracking-tight md:text-5xl text-white">
+                    Upload a book and make it searchable.
+                  </h2>
+                  <p className="max-w-2xl text-base leading-7 text-white/60 md:text-lg">
+                    PDF goes to Supabase Storage. Metadata lands in MongoDB. The archive can
+                    then pick it up through the existing search flow.
+                  </p>
+                </div>
 
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="border border-zinc-300 bg-white px-4 py-5">
-                  <FileText className="mb-4 h-5 w-5 text-zinc-700" />
-                  <div className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.5 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="border border-white/20 bg-white/5 backdrop-blur px-4 py-5 rounded-lg"
+                >
+                  <FileText className="mb-4 h-5 w-5 text-white/80" />
+                  <div className="text-xs font-bold uppercase tracking-[0.22em] text-white/60">
                     Required
                   </div>
-                  <div className="mt-2 text-sm text-zinc-700">PDF file up to 50MB.</div>
-                </div>
-                <div className="border border-zinc-300 bg-white px-4 py-5">
-                  <FileImage className="mb-4 h-5 w-5 text-zinc-700" />
-                  <div className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">
+                  <div className="mt-2 text-sm text-white/70">PDF file up to 50MB.</div>
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.5 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  className="border border-white/20 bg-white/5 backdrop-blur px-4 py-5 rounded-lg"
+                >
+                  <FileImage className="mb-4 h-5 w-5 text-white/80" />
+                  <div className="text-xs font-bold uppercase tracking-[0.22em] text-white/60">
                     Optional
                   </div>
-                  <div className="mt-2 text-sm text-zinc-700">Cover image up to 10MB.</div>
-                </div>
-                <div className="border border-zinc-300 bg-white px-4 py-5">
-                  <BookOpen className="mb-4 h-5 w-5 text-zinc-700" />
-                  <div className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">
+                  <div className="mt-2 text-sm text-white/70">Cover image up to 10MB.</div>
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.5 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="border border-white/20 bg-white/5 backdrop-blur px-4 py-5 rounded-lg"
+                >
+                  <BookOpen className="mb-4 h-5 w-5 text-white/80" />
+                  <div className="text-xs font-bold uppercase tracking-[0.22em] text-white/60">
                     Indexed
                   </div>
-                  <div className="mt-2 text-sm text-zinc-700">Title, author, tags, category.</div>
-                </div>
+                  <div className="mt-2 text-sm text-white/70">Title, author, tags, category.</div>
+                </motion.div>
               </div>
             </div>
 
-            <div className="grid gap-4 border-t border-zinc-300 pt-6 md:grid-cols-3">
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-zinc-500">
+            <div className="grid gap-4 border-t border-white/20 pt-6 md:grid-cols-3">
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/60">
                   PDF
                 </div>
-                <div className="mt-2 text-sm text-zinc-700">
+                <div className="mt-2 text-sm text-white/70">
                   {pdfFile ? `${pdfFile.name} (${formatBytes(pdfFile.size)})` : "No file selected"}
                 </div>
-              </div>
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-zinc-500">
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/60">
                   Cover
                 </div>
-                <div className="mt-2 text-sm text-zinc-700">
+                <div className="mt-2 text-sm text-white/70">
                   {coverFile ? `${coverFile.name} (${formatBytes(coverFile.size)})` : "Optional"}
                 </div>
-              </div>
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-zinc-500">
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/60">
                   Tags
                 </div>
                 <div className="mt-2 flex min-h-6 flex-wrap gap-2">
@@ -238,56 +483,63 @@ export default function UploadPage() {
                     tagPreview.map((tag) => (
                       <span
                         key={tag}
-                        className="border border-zinc-300 bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-600"
+                        className="border border-white/20 bg-white/10 backdrop-blur px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/70 rounded"
                       >
                         {tag}
                       </span>
                     ))
                   ) : (
-                    <span className="text-sm text-zinc-600">No tags yet.</span>
+                    <span className="text-sm text-white/60">No tags yet.</span>
                   )}
                 </div>
-              </div>
+              </motion.div>
             </div>
           </section>
 
-          <form className="grid gap-5 self-start" onSubmit={handleSubmit}>
-            <div className="grid gap-5 bg-white p-6 shadow-[0_24px_80px_rgba(30,20,0,0.08)] md:p-8">
+          <motion.form 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="grid gap-5 self-start" 
+            onSubmit={handleSubmit}
+          >
+            <div className="grid gap-5 bg-white/5 backdrop-blur border border-white/20 p-6 md:p-8 rounded-2xl">
               <div className="grid gap-5 md:grid-cols-2">
                 <label className="grid gap-2">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-zinc-500">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-white/60">
                     Title
                   </span>
                   <input
                     required
                     value={form.title}
                     onChange={handleChange("title")}
-                    className="h-12 border border-zinc-300 px-4 text-sm outline-none transition-colors focus:border-black"
+                    className="h-12 border border-white/20 bg-white/10 backdrop-blur px-4 text-sm text-white placeholder-white/40 outline-none transition-colors focus:border-white/40 rounded-lg"
                   />
                 </label>
                 <label className="grid gap-2">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-zinc-500">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-white/60">
                     Author
                   </span>
                   <input
                     required
                     value={form.author}
                     onChange={handleChange("author")}
-                    className="h-12 border border-zinc-300 px-4 text-sm outline-none transition-colors focus:border-black"
+                    className="h-12 border border-white/20 bg-white/10 backdrop-blur px-4 text-sm text-white placeholder-white/40 outline-none transition-colors focus:border-white/40 rounded-lg"
                   />
                 </label>
               </div>
 
               <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_160px]">
                 <label className="grid gap-2">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-zinc-500">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-white/60">
                     Category
                   </span>
                   <select
                     required
                     value={form.category}
                     onChange={handleChange("category")}
-                    className="h-12 border border-zinc-300 bg-white px-4 text-sm outline-none transition-colors focus:border-black"
+                    className="h-12 border border-white/20 bg-white/10 backdrop-blur px-4 text-sm text-white outline-none transition-colors focus:border-white/40 rounded-lg"
                   >
                     <option value="">Select category</option>
                     {categories.map((category) => (
@@ -298,7 +550,7 @@ export default function UploadPage() {
                   </select>
                 </label>
                 <label className="grid gap-2">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-zinc-500">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-white/60">
                     Year
                   </span>
                   <input
@@ -306,45 +558,45 @@ export default function UploadPage() {
                     inputMode="numeric"
                     value={form.publishedYear}
                     onChange={handleChange("publishedYear")}
-                    className="h-12 border border-zinc-300 px-4 text-sm outline-none transition-colors focus:border-black"
+                    className="h-12 border border-white/20 bg-white/10 backdrop-blur px-4 text-sm text-white placeholder-white/40 outline-none transition-colors focus:border-white/40 rounded-lg"
                   />
                 </label>
               </div>
 
               <label className="grid gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-zinc-500">
+                <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-white/60">
                   Tags
                 </span>
                 <input
                   value={form.tags}
                   onChange={handleChange("tags")}
                   placeholder="classic, philosophy, physics"
-                  className="h-12 border border-zinc-300 px-4 text-sm outline-none transition-colors focus:border-black"
+                  className="h-12 border border-white/20 bg-white/10 backdrop-blur px-4 text-sm text-white placeholder-white/40 outline-none transition-colors focus:border-white/40 rounded-lg"
                 />
               </label>
 
               <label className="grid gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-zinc-500">
+                <span className="text-[11px] font-bold uppercase tracking-[0.26em] text-white/60">
                   Summary
                 </span>
                 <textarea
                   rows={5}
                   value={form.summary}
                   onChange={handleChange("summary")}
-                  className="resize-none border border-zinc-300 px-4 py-3 text-sm leading-6 outline-none transition-colors focus:border-black"
+                  className="resize-none border border-white/20 bg-white/10 backdrop-blur px-4 py-3 text-sm text-white placeholder-white/40 leading-6 outline-none transition-colors focus:border-white/40 rounded-lg"
                 />
               </label>
 
               <div className="grid gap-5 md:grid-cols-2">
-                <label className="grid gap-3 border border-dashed border-zinc-300 px-4 py-5">
-                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.26em] text-zinc-500">
+                <label className="grid gap-3 border border-dashed border-white/20 px-4 py-5 rounded-lg cursor-pointer hover:border-white/40 transition-colors">
+                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.26em] text-white/60">
                     <Upload className="h-4 w-4" />
                     PDF file
                   </span>
                   <input type="file" accept="application/pdf" onChange={handlePdfChange} required />
                 </label>
-                <label className="grid gap-3 border border-dashed border-zinc-300 px-4 py-5">
-                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.26em] text-zinc-500">
+                <label className="grid gap-3 border border-dashed border-white/20 px-4 py-5 rounded-lg cursor-pointer hover:border-white/40 transition-colors">
+                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.26em] text-white/60">
                     <FileImage className="h-4 w-4" />
                     Cover image
                   </span>
@@ -353,29 +605,34 @@ export default function UploadPage() {
               </div>
 
               {(error || success) && (
-                <div
-                  className={`border px-4 py-3 text-sm ${
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`border px-4 py-3 text-sm rounded-lg ${
                     error
-                      ? "border-red-200 bg-red-50 text-red-700"
-                      : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                      ? "border-red-500/50 bg-red-500/10 text-red-400"
+                      : "border-green-500/50 bg-green-500/10 text-green-400"
                   }`}
                 >
                   {error || success}
-                </div>
+                </motion.div>
               )}
 
-              <button
+              <motion.button
                 type="submit"
                 disabled={isUploading}
-                className="flex h-13 items-center justify-center gap-3 bg-black px-6 text-xs font-black uppercase tracking-[0.3em] text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+                whileHover={{ scale: isUploading ? 1 : 1.05 }}
+                whileTap={{ scale: isUploading ? 1 : 0.95 }}
+                className="flex h-13 items-center justify-center gap-3 bg-white text-black px-6 text-xs font-black uppercase tracking-[0.3em] transition-all hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/50 rounded-lg"
               >
                 {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 {isUploading ? "Uploading" : "Upload Book"}
-              </button>
+              </motion.button>
             </div>
-          </form>
+          </motion.form>
         </div>
       </div>
     </main>
   );
 }
+
