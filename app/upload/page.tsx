@@ -633,6 +633,7 @@ export default function UploadPage() {
           </motion.form>
         </div>
       </div>
+      </div>
     </main>
   );
 }
