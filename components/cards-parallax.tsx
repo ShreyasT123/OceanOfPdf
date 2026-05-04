@@ -1,4 +1,5 @@
 import { MotionValue, motion, useTransform, useSpring } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface CardsParallaxProps {
     scrollProgress: MotionValue<number>;
@@ -16,6 +17,7 @@ const images = [
 ];
 
 export default function CardsParallax({ scrollProgress, inputRange, onHoverChange }: CardsParallaxProps) {
+    const router = useRouter();
     // Map the relevant scroll range to 0-1 for local progress
     // We'll effectively normalize this so we can reason about "local time"
 
@@ -59,7 +61,7 @@ export default function CardsParallax({ scrollProgress, inputRange, onHoverChang
                 const rotate = useTransform(
                     scrollProgress,
                     [cardStart, transitionPoint, cardEnd],
-                    [i % 2 === 0 ? -5 : 5, i % 2 === 0 ? -12 : 12, i % 2 === 0 ? -8 : 8]
+                    [0, 0, 0]
                 );
 
                 const scale = useTransform(
@@ -74,7 +76,11 @@ export default function CardsParallax({ scrollProgress, inputRange, onHoverChang
                         style={{ y, x, rotate, scale }}
                         onMouseEnter={() => onHoverChange?.(true)}
                         onMouseLeave={() => onHoverChange?.(false)}
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[22vw] h-[32vw] bg-[#1a1a1a] rounded-2xl border border-white/10 overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] origin-center pointer-events-auto group"
+                        onClick={() => {
+                            const name = img.split('/').pop()?.split('.')[0];
+                            router.push(`/search?q=${name}`);
+                        }}
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[22vw] h-[32vw] bg-[#1a1a1a] rounded-2xl border border-white/10 overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] origin-center pointer-events-auto group cursor-pointer"
                     >
                         <div className="relative w-full h-full">
                             {/* Inner Glow/Border */}
